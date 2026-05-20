@@ -1,55 +1,67 @@
 # Codemagic CI/CD for Word Fall
 # App: https://github.com/mattypatty918-wq/word-drop-game
+# Bundle ID: com.mattypattysapps.wordfall
 
 workflows:
   ios-build:
     name: iOS Build
     max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Codemagic
     environment:
       vars:
-        APP_ID: "com.mattypattysapps.wordfall"
-        APP_NAME: "Word Fall"
-        SCHEME: "App"
+        BUNDLE_ID: "com.mattypattysapps.wordfall"
         XCODE_WORKSPACE: "App/App.xcworkspace"
-        XCODE_PROJECT: "App/App.xcodeproj"
-        APPLE_TEAM_ID: "3B3YQ4328X"
+        XCODE_SCHEME: "App"
+        APP_STORE_APP_ID: ""
       node: v18
+      xcode: latest
+      cocoapods: default
     triggering:
       events:
         - push
         - tag
-      branch_patterns:
-        - pattern: main
+      branch-patterns:
+        - pattern: master
           include: true
     scripts:
       - name: Install npm dependencies
-        command: |
+        script: |
           npm install
-          npm install @capacitor/core @capacitor/cli
       - name: Sync Capacitor
-        command: |
+        script: |
           npx cap sync ios
-      - name: Set Xcode version
-        command: |
-          sudo xcode-select -s /Applications/Xcode_16.app
+      - name: Install CocoaPods
+        script: |
+          cd ios/App && pod install
+      - name: Set up keychain
+        script: |
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+      - name: Set up code signing settings
+        script: |
+          xcode-project use-profiles
+      - name: Increment build number
+        script: |
+          if [ -n "$APP_STORE_APP_ID" ]; then
+            BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID" || echo "0")
+            agvtool new-version -all $((BUILD_NUMBER + 1))
+          fi
       - name: Build iOS
         script: |
-          xcodebuild -workspace App/App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -archivePath build/WordFall.xcarchive \
-            archive
-          xcodebuild -exportArchive \
-            -archivePath build/WordFall.xcarchive \
-            -exportPath build \
-            -exportOptionsPlist App/ExportOptions.plist
+          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
     artifacts:
-      - build/*.ipa
+      - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
     publishing:
       app_store_connect:
-        apple_id: ${{ secrets.APPLE_ID }}
-        password: ${{ secrets.APPLE_APP_PASSWORD }}
-        team_id: ${{ secrets.APPLE_TEAM_ID }}
+        auth: integration
       email:
         recipients:
           - mattypatty918@gmail.com
@@ -60,22 +72,39 @@ workflows:
   android-build:
     name: Android Build
     max_build_duration: 60
+    instance_type: linux_x2
     environment:
       vars:
-        APP_ID: "com.mattypattysapps.wordfall"
+        PACKAGE_NAME: "com.mattypattysapps.wordfall"
       node: v18
       java: java17
+    triggering:
+      events:
+        - push
+        - tag
+      branch-patterns:
+        - pattern: master
+          include: true
     scripts:
       - name: Install dependencies
-        command: |
+        script: |
           npm install
+      - name: Sync Capacitor
+        script: |
           npx cap sync android
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       - name: Build Android
-        command: |
+        script: |
           cd android && ./gradlew assembleRelease
     artifacts:
       - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
     publishing:
       email:
         recipients:
           - mattypatty918@gmail.com
+        notify:
+          success: true
+          failure: true
