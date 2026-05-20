@@ -148,7 +148,7 @@ export default function App() {
   if (state.stage === 'menu') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 flex flex-col items-center justify-center text-white p-6">
-        <h1 className="text-5xl font-black mb-2 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">WORD DROP</h1>
+        <h1 className="text-5xl font-black mb-2 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">WORD FALL</h1>
         <p className="text-zinc-400 mb-8 text-lg">Find words. Beat the clock.</p>
         <div className="bg-white/5 rounded-2xl p-6 text-center mb-6">
           <p className="text-zinc-400 text-sm mb-1">Best Score</p>

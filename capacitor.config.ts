@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.worddrop.game',
-  appName: 'Word Drop',
+  appId: 'com.mattypattysapps.wordfall',
+  appName: 'Word Fall',
   webDir: 'dist',
   server: { androidScheme: 'https' },
   plugins: {
