@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mattypattysapps.wordfall',
-  appName: 'Word Fall',
+  appId: "com.mattypattysapps.letterdrop",
+  appName: "LetterDrop",
   webDir: 'dist',
   server: { androidScheme: 'https' },
   plugins: {
