@@ -1,4 +1,4 @@
-# Codemagic CI/CD for word-drop-game
+# Codemagic CI/CD for LetterDrop
 workflows:
   ios-workflow:
     name: iOS
@@ -6,18 +6,18 @@ workflows:
     environment:
       vars:
         XCODE_VERSION: "15.0"
-        APP_NAME: "word-drop-game"
+        APP_NAME: "LetterDrop"
     triggering:
       branch_patterns:
         - pattern: master
           include: true
     scripts:
-      - git clone https://github.com/mattypatty918-wq/word-drop-game.git --depth 1
-      - cd word-drop-game && git submodule update --init --recursive
-      - cd word-drop-game && xcode-project fetch-dependencies --use-cache
-      - cd word-drop-game && xcode-project build --workspace ios/App.xcworkspace --scheme App --configuration Release
+      - git clone https://github.com/mattypatty918-wq/letter-drop.git --depth 1
+      - cd letter-drop && git submodule update --init --recursive
+      - cd letter-drop && xcode-project fetch-dependencies --use-cache
+      - cd letter-drop && xcode-project build --workspace ios/App.xcworkspace --scheme App --configuration Release
     artifacts:
-      - word-drop-game/ios/App/App.xcarchive
+      - letter-drop/ios/App/App.xcarchive
     publishing:
       app_store_connect:
         api_key: Whitefoxes
